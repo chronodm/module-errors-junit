@@ -34,14 +34,10 @@ sourceSets {
   main.output.resourcesDir = main.java.outputDir
 }
 
-// Make Gradle use the module path at compile time
 compileJava {
-  inputs.property("moduleName", moduleName)
   doFirst {
     options.compilerArgs = [
-        '--module-path', classpath.asPath,
-        '--patch-module', "$moduleName=" + files(sourceSets.main.resources.srcDirs).asPath,
-        '--module-version', "$moduleVersion"
+      '--module-path', classpath.asPath,
     ]
     classpath = files()
   }
@@ -51,21 +47,24 @@ compileTestJava {
   inputs.property("moduleName", moduleName)
   doFirst {
     options.compilerArgs = [
-        '--module-path', classpath.asPath,
-        '--patch-module', "$moduleName=" + files(sourceSets.main.resources.srcDirs).asPath,
-        '--module-version', "$moduleVersion"
+      '--module-path', classpath.asPath,
+      '--add-modules', 'org.junit.jupiter.api',
+      '--add-reads', "$moduleName=org.junit.jupiter.api",
+      '--patch-module', "$moduleName=" + files(sourceSets.test.java.srcDirs).asPath,
     ]
     classpath = files()
   }
 }
 
-// Make Gradle use the module path at run time
 test {
   inputs.property("moduleName", moduleName)
   doFirst {
     jvmArgs = [
-        '--module-path', classpath.asPath,
-        '--module', "$moduleName/$mainClassName"
+      '--module-path', classpath.asPath,
+      '--add-modules', 'ALL-MODULE-PATH',
+      '--add-opens', "$moduleName/org.dmoles=org.junit.platform.commons",
+      '--add-reads', "$moduleName=org.junit.jupiter.api",
+      '--patch-module', "$moduleName=" + files(sourceSets.test.java.outputDir).asPath,
     ]
     classpath = files()
   }

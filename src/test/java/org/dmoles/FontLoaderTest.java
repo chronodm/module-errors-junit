@@ -8,7 +8,7 @@ import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class FontLoaderTest {
+class FontLoaderTest {
 
   private FontLoader fontLoader;
 
@@ -19,9 +19,14 @@ public class FontLoaderTest {
 
   @Test
   void loadsFonts() {
-    var uri = URI.create("https://github.com/google/fonts/blob/master/ofl/muli/Muli-Bold.ttf?raw=true");
-    Font font = FontLoader.loadFont(uri);
-    var family = font.getFamily();
-    assertEquals(family, "Muli");
+    try {
+      var uri = URI.create("https://github.com/google/fonts/blob/master/ofl/muli/Muli-Bold.ttf?raw=true");
+      Font font = FontLoader.loadFont(uri);
+      var family = font.getFamily();
+      assertEquals(family, "Muli");
+    } catch (RuntimeException e) {
+      e.printStackTrace();
+      throw e;
+    }
   }
 }
