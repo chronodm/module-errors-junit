@@ -1,0 +1,72 @@
+plugins {
+  id 'java'
+  id 'java-library'
+}
+
+sourceCompatibility = 10
+targetCompatibility = 10
+
+test {
+  useJUnitPlatform()
+}
+
+ext {
+  moduleName = 'org.dmoles'
+  moduleVersion = '0.1'
+  junitVersion = '5.2.0'
+}
+
+dependencies {
+  // ------------------------------------------------------------
+  // Testing
+
+  testCompile "org.junit.jupiter:junit-jupiter-api:$junitVersion"
+  testCompile "org.junit.jupiter:junit-jupiter-params:$junitVersion"
+  testRuntime "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
+  testCompile "org.junit.vintage:junit-vintage-engine:$junitVersion"
+}
+
+repositories {
+  jcenter()
+}
+
+sourceSets {
+  main.output.resourcesDir = main.java.outputDir
+}
+
+// Make Gradle use the module path at compile time
+compileJava {
+  inputs.property("moduleName", moduleName)
+  doFirst {
+    options.compilerArgs = [
+        '--module-path', classpath.asPath,
+        '--patch-module', "$moduleName=" + files(sourceSets.main.resources.srcDirs).asPath,
+        '--module-version', "$moduleVersion"
+    ]
+    classpath = files()
+  }
+}
+
+compileTestJava {
+  inputs.property("moduleName", moduleName)
+  doFirst {
+    options.compilerArgs = [
+        '--module-path', classpath.asPath,
+        '--patch-module', "$moduleName=" + files(sourceSets.main.resources.srcDirs).asPath,
+        '--module-version', "$moduleVersion"
+    ]
+    classpath = files()
+  }
+}
+
+// Make Gradle use the module path at run time
+test {
+  inputs.property("moduleName", moduleName)
+  doFirst {
+    jvmArgs = [
+        '--module-path', classpath.asPath,
+        '--module', "$moduleName/$mainClassName"
+    ]
+    classpath = files()
+  }
+}
